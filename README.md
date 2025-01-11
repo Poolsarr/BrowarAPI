@@ -1,603 +1,603 @@
-# 🍺 Browar API
+# 🍺 BrowarAPI
 
-API stworzone przy użyciu **Python (Flask)** i **MongoDB** służące do zarządzania browarem. Umożliwia zarządzanie użytkownikami, partiami produkcyjnymi, stanem magazynowym oraz recepturami piwa.
+This API, built using **Python (Flask)** and **MongoDB**, is designed for managing a brewery. It allows for the management of users, production batches, inventory, and beer recipes.
 
-## **Instalacja i uruchomienie**
+## **Installation and Setup**
 
-1.  **Skonfiguruj środowisko:**
-    *   Zainstaluj wymagane biblioteki:
+1.  **Configure Environment:**
+    *   Install required libraries:
         ```bash
         pip install -r requirements.txt
         ```
-    *   Utwórz plik `.env` w głównym katalogu z następującymi zmiennymi:
+    *   Create a `.env` file in the root directory with the following variables:
         ```
-        atlas_login=<TWÓJ_ADRES_MONGODB>
-        jwt_key=<TWÓJ_SEKRET_JWT>
+        atlas_login=<YOUR_MONGODB_ADDRESS>
+        jwt_key=<YOUR_JWT_SECRET>
         ```
-        *   `atlas_login` - adres połączenia z bazą danych MongoDB.
-        *   `jwt_key` - sekretny klucz do generowania tokenów JWT.
+        *   `atlas_login` - The connection address to your MongoDB database.
+        *   `jwt_key` - The secret key for generating JWT tokens.
 
-2.  **Uruchom API:**
-    *   Uruchom serwer za pomocą polecenia:
+2.  **Run the API:**
+    *   Start the server using the command:
         ```bash
         python server.py
         ```
 
-## Podstawowe Endpointy API
+## Basic API Endpoints
 
-**Lista podstawowych endpointów:**
+**List of Basic Endpoints:**
 
-| Endpoint        | Opis                                                   |
-| --------------- | ------------------------------------------------------ |
-| `POST /register` | Rejestracja nowego użytkownika.                       |
-| `POST /login`    | Logowanie użytkownika i uzyskanie tokena JWT.         |
-| `GET /batches`   | Pobranie listy partii produkcyjnych.                |
-|`GET /recipes`| Pobranie listy receptur.|
-|`GET /inventory` | Pobranie listy przedmiotów w magazynie.|
+| Endpoint        | Description                                        |
+| --------------- | -------------------------------------------------- |
+| `POST /register` | Register a new user.                              |
+| `POST /login`    | Log in a user and obtain a JWT token.              |
+| `GET /batches`   | Get a list of production batches.                  |
+|`GET /recipes`| Get a list of recipes.|
+|`GET /inventory` | Get a list of inventory items.|
 
-Wszystkie endpointy są szczegółowo opisane poniżej:
+All endpoints are described in detail below:
 
--   [**Autoryzacja**](#autoryzacja-/)
-    -   [Rejestracja](#rejestracja-)
-    -   [Logowanie](#logowanie-)
--   [**Partie Produkcyjne**](#partie-produkcyjne-)
-    -   [Pobierz Wszystkie Partie](#pobierz-wszystkie-partie-)
-    -   [Utwórz Partię](#utwórz-partię-)
-    -   [Pobierz Partię](#pobierz-partię-)
-    -   [Aktualizuj Partię](#aktualizuj-partię-)
-    -   [Usuń Partię](#usuń-partię-)
-    -   [Pobierz Partię z Recepturą](#pobierz-partię-z-recepturą-)
--   [**Magazyn**](#magazyn-)
-    -   [Pobierz Wszystkie Przedmioty](#pobierz-wszystkie-przedmioty-)
-    -   [Utwórz Przedmiot](#utwórz-przedmiot-)
-    -   [Pobierz Przedmiot](#pobierz-przedmiot-)
-    -   [Aktualizuj Przedmiot](#aktualizuj-przedmiot-)
-    -   [Usuń Przedmiot](#usuń-przedmiot-)
--   [**Receptury**](#receptury-)
-    -   [Pobierz Wszystkie Receptury](#pobierz-wszystkie-receptury-)
-    -   [Utwórz Recepturę](#utwórz-recepturę-)
-    -   [Pobierz Recepturę](#pobierz-recepturę-)
-    -   [Aktualizuj Recepturę](#aktualizuj-recepturę-)
-    -   [Usuń Recepturę](#usuń-recepturę-)
--   [**Użytkownicy**](#użytkownicy-)
-    -   [Pobierz Wszystkich Użytkowników](#pobierz-wszystkich-użytkowników-)
+-   [**Authentication**](#authentication-/)
+    -   [Registration](#registration-)
+    -   [Login](#login-)
+-   [**Production Batches**](#production-batches-)
+    -   [Get All Batches](#get-all-batches-)
+    -   [Create Batch](#create-batch-)
+    -   [Get Batch](#get-batch-)
+    -   [Update Batch](#update-batch-)
+    -   [Delete Batch](#delete-batch-)
+    -    [Get Batch with Recipe](#get-batch-with-recipe-)
+-   [**Inventory**](#inventory-)
+    -   [Get All Items](#get-all-items-)
+    -   [Create Item](#create-item-)
+    -   [Get Item](#get-item-)
+    -   [Update Item](#update-item-)
+    -   [Delete Item](#delete-item-)
+-   [**Recipes**](#recipes-)
+    -   [Get All Recipes](#get-all-recipes-)
+    -   [Create Recipe](#create-recipe-)
+    -   [Get Recipe](#get-recipe-)
+    -   [Update Recipe](#update-recipe-)
+    -   [Delete Recipe](#delete-recipe-)
+-   [**Users**](#users-)
+     - [Get All Users](#get-all-users-)
 
-## Szczegóły API
+## API Details
 
-### Autoryzacja (`/`) <a name="autoryzacja-/"></a>
+### Authentication (`/`) <a name="authentication-/"></a>
 
-#### `POST /register` <a name="rejestracja-"></a>
+#### `POST /register` <a name="registration-"></a>
 
-*   **Opis:** Rejestruje nowego użytkownika.
-*   **Treść żądania (JSON):**
+*   **Description:** Registers a new user.
+*   **Request Body (JSON):**
     ```json
     {
-      "login": "nazwa_użytkownika",
-      "password": "hasło_użytkownika"
+      "login": "username",
+      "password": "user_password"
     }
     ```
-*   **Odpowiedź (201 Created):**
+*   **Response (201 Created):**
     ```json
     {
-      "message": "Użytkownik <nazwa_użytkownika> został zarejestrowany"
+      "message": "User <username> has been registered"
     }
     ```
-*   **Odpowiedź (400 Bad Request):**
+*   **Response (400 Bad Request):**
     ```json
     {
-      "error": "Podaj login i hasło"
+      "error": "Please provide login and password"
     }
     ```
     ```json
     {
-      "error": "Użytkownik o podanym loginie już istnieje"
-    }
-    ```
-
-#### `POST /login` <a name="logowanie-"></a>
-
-*   **Opis:** Loguje użytkownika i zwraca token JWT.
-*   **Treść żądania (JSON):**
-    ```json
-    {
-      "login": "nazwa_użytkownika",
-      "password": "hasło_użytkownika"
-    }
-    ```
-*   **Odpowiedź (200 OK):**
-    ```json
-    {
-      "message": "Zalogowano pomyślnie!",
-      "access_token": "token_jwt"
-    }
-    ```
-*   **Odpowiedź (400 Bad Request):**
-    ```json
-    {
-      "error": "Podaj login i hasło"
-    }
-    ```
-*   **Odpowiedź (401 Unauthorized):**
-    ```json
-    {
-      "error": "Nieprawidłowy login lub hasło"
+      "error": "User with provided login already exists"
     }
     ```
 
-### Partie Produkcyjne (`/batches`) <a name="partie-produkcyjne-/"></a>
+#### `POST /login` <a name="login-"></a>
 
-#### `GET /batches` <a name="pobierz-wszystkie-partie-"></a>
+*   **Description:** Logs in a user and returns a JWT token.
+*   **Request Body (JSON):**
+    ```json
+    {
+      "login": "username",
+      "password": "user_password"
+    }
+    ```
+*   **Response (200 OK):**
+    ```json
+    {
+      "message": "Logged in successfully!",
+      "access_token": "jwt_token"
+    }
+    ```
+*   **Response (400 Bad Request):**
+    ```json
+    {
+      "error": "Please provide login and password"
+    }
+    ```
+*   **Response (401 Unauthorized):**
+    ```json
+    {
+      "error": "Invalid login or password"
+    }
+    ```
 
-*   **Opis:** Pobiera listę wszystkich partii produkcyjnych.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+### Production Batches (`/batches`) <a name="production-batches-/"></a>
+
+#### `GET /batches` <a name="get-all-batches-"></a>
+
+*   **Description:** Retrieves a list of all production batches.
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
 
     ```json
     [
         {
-            "_id": "id_partii_1",
-            "recipeId": "id_receptury_1",
-            "startDate": "data_rozpoczęcia",
-            "endDate": "data_zakończenia",
-            "status": "status_partii",
-            "volume": "objętość_partii",
-            "notes": "notatki"
+            "_id": "batch_id_1",
+            "recipeId": "recipe_id_1",
+            "startDate": "start_date",
+            "endDate": "end_date",
+            "status": "batch_status",
+            "volume": "batch_volume",
+            "notes": "notes"
         },
         {
-            "_id": "id_partii_2",
-            "recipeId": "id_receptury_2",
-            "startDate": "data_rozpoczęcia",
-            "endDate": "data_zakończenia",
-            "status": "status_partii",
-            "volume": "objętość_partii",
-            "notes": "notatki"
+            "_id": "batch_id_2",
+            "recipeId": "recipe_id_2",
+            "startDate": "start_date",
+            "endDate": "end_date",
+            "status": "batch_status",
+            "volume": "batch_volume",
+            "notes": "notes"
         }
     ]
     ```
 
-#### `POST /batches` <a name="utwórz-partię-"></a>
+#### `POST /batches` <a name="create-batch-"></a>
 
-*   **Opis:** Tworzy nową partię produkcyjną.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
-
-    ```json
-    {
-        "recipeId": "id_receptury",
-        "startDate": "data_rozpoczęcia",
-        "endDate": "data_zakończenia",
-        "status": "status_partii",
-        "volume": "objętość_partii",
-        "notes": "notatki"
-    }
-    ```
-
-*   **Odpowiedź (201 Created):**
-    ```json
-    {
-        "message": "Partia utworzona",
-        "batch_id": "id_nowej_partii"
-    }
-    ```
-
-#### `GET /batches/<batch_id>` <a name="pobierz-partię-"></a>
-
-*   **Opis:** Pobiera dane konkretnej partii produkcyjnej.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Creates a new production batch.
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
 
     ```json
     {
-        "_id": "id_partii",
-        "recipeId": "id_receptury",
-        "startDate": "data_rozpoczęcia",
-        "endDate": "data_zakończenia",
-        "status": "status_partii",
-        "volume": "objętość_partii",
-        "notes": "notatki"
+        "recipeId": "recipe_id",
+        "startDate": "start_date",
+        "endDate": "end_date",
+        "status": "batch_status",
+        "volume": "batch_volume",
+        "notes": "notes"
     }
     ```
 
-*   **Odpowiedź (404 Not Found):**
+*   **Response (201 Created):**
+    ```json
+    {
+        "message": "Batch created",
+        "batch_id": "new_batch_id"
+    }
+    ```
+
+#### `GET /batches/<batch_id>` <a name="get-batch-"></a>
+
+*   **Description:** Retrieves data for a specific production batch.
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
 
     ```json
     {
-        "error": "Nie znaleziono partii"
+        "_id": "batch_id",
+        "recipeId": "recipe_id",
+        "startDate": "start_date",
+        "endDate": "end_date",
+        "status": "batch_status",
+        "volume": "batch_volume",
+        "notes": "notes"
     }
     ```
 
-#### `PUT /batches/<batch_id>` <a name="aktualizuj-partię-"></a>
-
-*   **Opis:** Aktualizuje dane konkretnej partii produkcyjnej.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
+*   **Response (404 Not Found):**
 
     ```json
     {
-        "recipeId": "id_receptury",
-        "startDate": "data_rozpoczęcia",
-        "endDate": "data_zakończenia",
-        "status": "status_partii",
-        "volume": "objętość_partii",
-        "notes": "notatki"
+        "error": "Batch not found"
     }
     ```
 
-*   **Odpowiedź (200 OK):**
-    ```json
-    {
-        "message": "Partia zaktualizowana"
-    }
-    ```
+#### `PUT /batches/<batch_id>` <a name="update-batch-"></a>
 
-*   **Odpowiedź (400 Bad Request):**
+*   **Description:** Updates data for a specific production batch.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
 
     ```json
     {
-        "error": "Nie wprowadzono żadnych zmian"
+        "recipeId": "recipe_id",
+        "startDate": "start_date",
+        "endDate": "end_date",
+        "status": "batch_status",
+        "volume": "batch_volume",
+        "notes": "notes"
+    }
+    ```
+
+*   **Response (200 OK):**
+    ```json
+    {
+        "message": "Batch updated"
+    }
+    ```
+
+*   **Response (400 Bad Request):**
+
+    ```json
+    {
+        "error": "No changes were made"
     }
     ```
     ```json
     {
-        "error": "Brak danych do aktualizacji"
+      "error": "No data for update"
     }
     ```
 
-#### `DELETE /batches/<batch_id>` <a name="usuń-partię-"></a>
+#### `DELETE /batches/<batch_id>` <a name="delete-batch-"></a>
 
-*   **Opis:** Usuwa konkretną partię produkcyjną.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Deletes a specific production batch.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
     ```json
     {
-        "message": "Partia usunięta"
+        "message": "Batch deleted"
     }
     ```
-*   **Odpowiedź (404 Not Found):**
+*   **Response (404 Not Found):**
     ```json
     {
-        "error": "Nie znaleziono partii"
+        "error": "Batch not found"
     }
     ```
-  
-#### `GET /batches/<batch_id>/recipe` <a name="pobierz-partię-z-recepturą-"></a>
 
-*   **Opis:** Pobiera dane konkretnej partii produkcyjnej wraz z danymi receptury.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*    **Odpowiedź (200 OK):**
+#### `GET /batches/<batch_id>/recipe` <a name="get-batch-with-recipe-"></a>
+
+*   **Description:** Retrieves a specific production batch with recipe data.
+*   **Headers:** `Authorization: Bearer <token>`
+*    **Response (200 OK):**
         ```json
           {
-            "_id": "id_partii",
-            "recipeId": "id_receptury",
-            "startDate": "data_rozpoczęcia",
-            "endDate": "data_zakończenia",
-            "status": "status_partii",
-            "volume": "objętość_partii",
-            "notes": "notatki",
+            "_id": "batch_id",
+            "recipeId": "recipe_id",
+            "startDate": "start_date",
+            "endDate": "end_date",
+            "status": "batch_status",
+            "volume": "batch_volume",
+            "notes": "notes",
             "recipe": {
-                  "_id": "id_receptury",
-                  "name": "nazwa_receptury",
-                  "style": "styl_piwa",
-                   "ingredients": "składniki",
-                   "process": "proces_warzenia",
-                   "createdAt": "data_utworzenia",
-                   "updatedAt": "data_aktualizacji"
+                  "_id": "recipe_id",
+                  "name": "recipe_name",
+                  "style": "beer_style",
+                   "ingredients": "ingredients",
+                   "process": "brewing_process",
+                   "createdAt": "created_at_date",
+                   "updatedAt": "updated_at_date"
             }
          }
         ```
-*   **Odpowiedź (404 Not Found):**
+*   **Response (404 Not Found):**
     ```json
     {
-        "error": "Nie znaleziono partii"
+        "error": "Batch not found"
     }
     ```
 
-### Magazyn (`/inventory`) <a name="magazyn-/"></a>
+### Inventory (`/inventory`) <a name="inventory-/"></a>
 
-#### `GET /inventory` <a name="pobierz-wszystkie-przedmioty-"></a>
+#### `GET /inventory` <a name="get-all-items-"></a>
 
-*   **Opis:** Pobiera listę wszystkich przedmiotów w magazynie.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Retrieves a list of all items in the inventory.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
 
     ```json
     [
       {
-        "_id": "id_pozycji_1",
-        "item": "nazwa_przedmiotu_1",
-        "type": "typ_przedmiotu_1",
-        "quantity": "ilość_1",
-        "unit": "jednostka_1",
-        "location": "lokalizacja_1",
-        "updatedAt": "data_aktualizacji"
+        "_id": "item_id_1",
+        "item": "item_name_1",
+        "type": "item_type_1",
+        "quantity": "quantity_1",
+        "unit": "unit_1",
+        "location": "location_1",
+        "updatedAt": "updated_at_date"
       },
       {
-        "_id": "id_pozycji_2",
-        "item": "nazwa_przedmiotu_2",
-        "type": "typ_przedmiotu_2",
-        "quantity": "ilość_2",
-        "unit": "jednostka_2",
-        "location": "lokalizacja_2",
-        "updatedAt": "data_aktualizacji"
+        "_id": "item_id_2",
+        "item": "item_name_2",
+        "type": "item_type_2",
+        "quantity": "quantity_2",
+        "unit": "unit_2",
+        "location": "location_2",
+        "updatedAt": "updated_at_date"
       }
     ]
     ```
 
-#### `POST /inventory` <a name="utwórz-przedmiot-"></a>
+#### `POST /inventory` <a name="create-item-"></a>
 
-*   **Opis:** Tworzy nowy przedmiot w magazynie.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
-
-    ```json
-    {
-      "item": "nazwa_przedmiotu",
-      "type": "typ_przedmiotu",
-      "quantity": "ilość",
-      "unit": "jednostka",
-      "location": "lokalizacja",
-      "updatedAt": "data_aktualizacji"
-    }
-    ```
-
-*   **Odpowiedź (201 Created):**
-    ```json
-    {
-      "message": "Przedmiot magazynowy utworzony",
-      "item_id": "id_nowej_pozycji"
-    }
-    ```
-
-#### `GET /inventory/<item_id>` <a name="pobierz-przedmiot-"></a>
-
-*   **Opis:** Pobiera dane konkretnego przedmiotu w magazynie.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Creates a new item in the inventory.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
 
     ```json
     {
-      "_id": "id_pozycji",
-      "item": "nazwa_przedmiotu",
-      "type": "typ_przedmiotu",
-      "quantity": "ilość",
-      "unit": "jednostka",
-      "location": "lokalizacja",
-      "updatedAt": "data_aktualizacji"
+      "item": "item_name",
+      "type": "item_type",
+      "quantity": "quantity",
+      "unit": "unit",
+      "location": "location",
+      "updatedAt": "updated_at_date"
     }
     ```
 
-*   **Odpowiedź (404 Not Found):**
+*   **Response (201 Created):**
     ```json
     {
-       "error": "Nie znaleziono przedmiotu"
+      "message": "Inventory item created",
+      "item_id": "new_item_id"
     }
     ```
 
-#### `PUT /inventory/<item_id>` <a name="aktualizuj-przedmiot-"></a>
+#### `GET /inventory/<item_id>` <a name="get-item-"></a>
 
-*   **Opis:** Aktualizuje dane konkretnego przedmiotu w magazynie.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
+*   **Description:** Retrieves data for a specific item in the inventory.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
 
     ```json
     {
-      "item": "nazwa_przedmiotu",
-      "type": "typ_przedmiotu",
-      "quantity": "ilość",
-      "unit": "jednostka",
-      "location": "lokalizacja",
-      "updatedAt": "data_aktualizacji"
+      "_id": "item_id",
+      "item": "item_name",
+      "type": "item_type",
+      "quantity": "quantity",
+      "unit": "unit",
+      "location": "location",
+      "updatedAt": "updated_at_date"
     }
     ```
 
-*   **Odpowiedź (200 OK):**
+*   **Response (404 Not Found):**
     ```json
     {
-      "message": "Przedmiot magazynowy zaktualizowany"
+       "error": "Item not found"
     }
     ```
 
-*   **Odpowiedź (400 Bad Request):**
+#### `PUT /inventory/<item_id>` <a name="update-item-"></a>
+
+*   **Description:** Updates data for a specific item in the inventory.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
+
     ```json
     {
-        "error": "Nie wprowadzono żadnych zmian"
+      "item": "item_name",
+      "type": "item_type",
+      "quantity": "quantity",
+      "unit": "unit",
+      "location": "location",
+      "updatedAt": "updated_at_date"
+    }
+    ```
+
+*   **Response (200 OK):**
+    ```json
+    {
+      "message": "Inventory item updated"
+    }
+    ```
+
+*   **Response (400 Bad Request):**
+    ```json
+    {
+        "error": "No changes were made"
     }
     ```
     ```json
     {
-        "error": "Brak danych do aktualizacji"
+        "error": "No data for update"
     }
     ```
 
-#### `DELETE /inventory/<item_id>` <a name="usuń-przedmiot-"></a>
+#### `DELETE /inventory/<item_id>` <a name="delete-item-"></a>
 
-*   **Opis:** Usuwa konkretny przedmiot z magazynu.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Deletes a specific item from the inventory.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
     ```json
     {
-      "message": "Przedmiot magazynowy usunięty"
+      "message": "Inventory item deleted"
     }
     ```
 
-*   **Odpowiedź (404 Not Found):**
+*   **Response (404 Not Found):**
     ```json
     {
-        "error": "Nie znaleziono przedmiotu"
+        "error": "Item not found"
     }
     ```
 
-### Receptury (`/recipes`) <a name="receptury-/"></a>
+### Recipes (`/recipes`) <a name="recipes-/"></a>
 
-#### `GET /recipes` <a name="pobierz-wszystkie-receptury-"></a>
+#### `GET /recipes` <a name="get-all-recipes-"></a>
 
-*   **Opis:** Pobiera listę wszystkich receptur.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Retrieves a list of all recipes.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
 
     ```json
     [
         {
-          "_id": "id_receptury_1",
-          "name": "nazwa_receptury_1",
-          "style": "styl_piwa_1",
-          "ingredients": "składniki_1",
-          "process": "proces_warzenia_1",
-          "createdAt": "data_utworzenia_1",
-          "updatedAt": "data_aktualizacji_1"
+          "_id": "recipe_id_1",
+          "name": "recipe_name_1",
+          "style": "beer_style_1",
+          "ingredients": "ingredients_1",
+          "process": "brewing_process_1",
+          "createdAt": "created_at_date_1",
+          "updatedAt": "updated_at_date_1"
         },
         {
-          "_id": "id_receptury_2",
-          "name": "nazwa_receptury_2",
-          "style": "styl_piwa_2",
-          "ingredients": "składniki_2",
-          "process": "proces_warzenia_2",
-          "createdAt": "data_utworzenia_2",
-          "updatedAt": "data_aktualizacji_2"
+          "_id": "recipe_id_2",
+          "name": "recipe_name_2",
+          "style": "beer_style_2",
+          "ingredients": "ingredients_2",
+          "process": "brewing_process_2",
+          "createdAt": "created_at_date_2",
+          "updatedAt": "updated_at_date_2"
         }
     ]
     ```
 
-#### `POST /recipes` <a name="utwórz-recepturę-"></a>
+#### `POST /recipes` <a name="create-recipe-"></a>
 
-*   **Opis:** Tworzy nową recepturę.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
+*   **Description:** Creates a new recipe.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
 
     ```json
     {
-       "_id": "id_receptury(5 cyfr)",
-       "name": "nazwa_receptury",
-        "style": "styl_piwa",
-        "ingredients": "składniki",
-       "process": "proces_warzenia",
-        "createdAt": "data_utworzenia",
-        "updatedAt": "data_aktualizacji"
+       "_id": "recipe_id(5 digits)",
+       "name": "recipe_name",
+        "style": "beer_style",
+        "ingredients": "ingredients",
+       "process": "brewing_process",
+        "createdAt": "created_at_date",
+        "updatedAt": "updated_at_date"
     }
     ```
 
-*   **Odpowiedź (201 Created):**
+*   **Response (201 Created):**
     ```json
     {
-      "message": "Receptura utworzona",
-      "recipe_id": "id_nowej_receptury"
+      "message": "Recipe created",
+      "recipe_id": "new_recipe_id"
     }
     ```
-*   **Odpowiedź (400 Bad Request):**
-    ```json
+*   **Response (400 Bad Request):**
+     ```json
     {
-      "error": "ID musi być 5-cyfrowym numerem"
-    }
-    ```
-    ```json
-    {
-       "error": "Receptura o podanym ID już istnieje"
-    }
-    ```
-
-#### `GET /recipes/<recipe_id>` <a name="pobierz-recepturę-"></a>
-
-*   **Opis:** Pobiera dane konkretnej receptury.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
-
-    ```json
-    {
-      "_id": "id_receptury",
-      "name": "nazwa_receptury",
-      "style": "styl_piwa",
-      "ingredients": "składniki",
-      "process": "proces_warzenia",
-      "createdAt": "data_utworzenia",
-      "updatedAt": "data_aktualizacji"
-    }
-    ```
-
-*   **Odpowiedź (404 Not Found):**
-    ```json
-    {
-        "error": "Nie znaleziono receptury"
-    }
-    ```
-
-#### `PUT /recipes/<recipe_id>` <a name="aktualizuj-recepturę-"></a>
-
-*   **Opis:** Aktualizuje dane konkretnej receptury.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Treść żądania (JSON):**
-
-    ```json
-    {
-      "name": "nazwa_receptury",
-      "style": "styl_piwa",
-      "ingredients": "składniki",
-      "process": "proces_warzenia",
-      "updatedAt": "data_aktualizacji"
-    }
-    ```
-
-*   **Odpowiedź (200 OK):**
-    ```json
-    {
-      "message": "Receptura zaktualizowana"
-    }
-    ```
-
-*   **Odpowiedź (400 Bad Request):**
-    ```json
-    {
-        "error": "Nie wprowadzono żadnych zmian"
+      "error": "ID must be a 5-digit number"
     }
     ```
     ```json
     {
-        "error": "Brak danych do aktualizacji"
+       "error": "Recipe with the provided ID already exists"
     }
     ```
 
-#### `DELETE /recipes/<recipe_id>` <a name="usuń-recepturę-"></a>
+#### `GET /recipes/<recipe_id>` <a name="get-recipe-"></a>
 
-*   **Opis:** Usuwa konkretną recepturę.
-*  **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Retrieves data for a specific recipe.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
+
     ```json
     {
-      "message": "Receptura usunięta"
+      "_id": "recipe_id",
+      "name": "recipe_name",
+      "style": "beer_style",
+      "ingredients": "ingredients",
+      "process": "brewing_process",
+      "createdAt": "created_at_date",
+      "updatedAt": "updated_at_date"
     }
     ```
 
-*   **Odpowiedź (404 Not Found):**
+*   **Response (404 Not Found):**
     ```json
     {
-        "error": "Nie znaleziono receptury"
+        "error": "Recipe not found"
     }
     ```
 
-### Użytkownicy (`/users`) <a name="użytkownicy-/"></a>
-  #### `GET /users` <a name="pobierz-wszystkich-użytkowników-"></a>
+#### `PUT /recipes/<recipe_id>` <a name="update-recipe-"></a>
 
-*   **Opis:** Pobiera listę wszystkich zarejestrowanych użytkowników.
-*   **Nagłówki:** `Authorization: Bearer <token>`
-*   **Odpowiedź (200 OK):**
+*   **Description:** Updates data for a specific recipe.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Request Body (JSON):**
+
+    ```json
+    {
+      "name": "recipe_name",
+      "style": "beer_style",
+      "ingredients": "ingredients",
+      "process": "brewing_process",
+      "updatedAt": "updated_at_date"
+    }
+    ```
+
+*   **Response (200 OK):**
+    ```json
+    {
+      "message": "Recipe updated"
+    }
+    ```
+
+*   **Response (400 Bad Request):**
+    ```json
+    {
+        "error": "No changes were made"
+    }
+    ```
+    ```json
+    {
+        "error": "No data for update"
+    }
+    ```
+
+#### `DELETE /recipes/<recipe_id>` <a name="delete-recipe-"></a>
+
+*   **Description:** Deletes a specific recipe.
+*  **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
+    ```json
+    {
+      "message": "Recipe deleted"
+    }
+    ```
+
+*   **Response (404 Not Found):**
+    ```json
+    {
+        "error": "Recipe not found"
+    }
+    ```
+
+### Users (`/users`) <a name="users-/"></a>
+  #### `GET /users` <a name="get-all-users-"></a>
+
+*   **Description:** Retrieves a list of all registered users.
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Response (200 OK):**
        ```json
             [
               {
-                "_id": "id_uzytkownika_1",
-                 "login": "login_uzytkownika_1"
+                "_id": "user_id_1",
+                 "login": "user_login_1"
               },
              {
-                "_id": "id_uzytkownika_2",
-                "login": "login_uzytkownika_2"
+                "_id": "user_id_2",
+                "login": "user_login_2"
              }
             ]
        ```
-## Bezpieczeństwo API
+## API Security
 
--   Większość endpointów wymaga uwierzytelnienia za pomocą tokenu JWT.
--   Sekrety przechowywane są w pliku `.env`.
--   Token JWT jest uzyskiwany po zalogowaniu (`POST /login`).
+-   Most endpoints require authentication using a JWT token.
+-   Secrets are stored in a `.env` file.
+-   The JWT token is obtained after logging in (`POST /login`).
 
-## Technologie
+## Technologies
 
 *   Python
 *   Flask
